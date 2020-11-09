@@ -90,27 +90,6 @@ public class RouletteRedisRepository {
 		return result;
 	}
 
-//	public String loadListRoulettes(List<Roulette> rouletteList) {
-//		String result = APIConstants.CODE_FAILED;
-//		Map<String, String> roulettes = new HashMap<>();
-//		try {
-//			if (rouletteList != null && !rouletteList.isEmpty()) {
-//				rouletteList.stream().forEach(r -> {
-//					String json = new JSONObject(r).toString();
-//					roulettes.put(r.getIdRoulette(), json);
-//				});
-//				if (!roulettes.isEmpty()) {
-//					saveRoulettes(roulettes);
-//					result = APIConstants.CODE_SUCCESSFUL;
-//				} else {
-//					result = APIConstants.CODE_SUCCESSFUL;
-//				}
-//			}
-//		} catch (Exception exception) {
-//		}
-//		return result;
-//	}
-
 	public void saveRoulette(Map<String, String> roulette) {
 		if (roulette != null && !roulette.isEmpty()) {
 			redisTemplateRoullete.opsForHash().putAll(hashRoulette, roulette);
