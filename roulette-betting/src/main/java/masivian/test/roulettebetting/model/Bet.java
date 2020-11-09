@@ -8,8 +8,10 @@ public class Bet {
 	private Roulette roulette;
 	private double betAmount;
 	private Client client;
+	private String result;
 
-	public Bet(String id, int number, String colour, Roulette roulette, double betAmount, Client client) {
+	public Bet(String id, int number, String colour, Roulette roulette, double betAmount, Client client,
+			String result) {
 		super();
 		this.id = id;
 		this.number = number;
@@ -17,6 +19,23 @@ public class Bet {
 		this.roulette = roulette;
 		this.betAmount = betAmount;
 		this.client = client;
+		this.result = result;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public void setClient(Client client) {
+		this.client = client;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
 	}
 
 	public String getId() {
@@ -59,18 +78,10 @@ public class Bet {
 		this.betAmount = betAmount;
 	}
 
-	public Client getIdClient() {
-		return client;
-	}
-
-	public void setIdClient(Client idClient) {
-		this.client = idClient;
-	}
-
 	@Override
 	public String toString() {
 		return "Bet [id=" + id + ", number=" + number + ", colour=" + colour + ", roulette=" + roulette + ", betAmount="
-				+ betAmount + ", client=" + client + "]";
+				+ betAmount + ", client=" + client + ", result=" + result + "]";
 	}
 
 }

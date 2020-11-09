@@ -15,4 +15,6 @@ public interface IRouletteService {
 	public Roulette findRouletteById(String id);
 
 	public List<Roulette> getAllRoulettes();
+
+	public GenericResponse closedRoulette(String id);
 }

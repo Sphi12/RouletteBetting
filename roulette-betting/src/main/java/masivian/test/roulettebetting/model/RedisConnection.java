@@ -11,7 +11,7 @@ package masivian.test.roulettebetting.model;
  * @version 1.0, 30/03/2020
  *
  */
-public class RedisConnectionDTO {
+public class RedisConnection {
 
 	/**
 	 * Define url de conexion.

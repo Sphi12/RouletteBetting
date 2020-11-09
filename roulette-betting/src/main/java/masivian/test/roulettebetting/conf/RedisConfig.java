@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import masivian.test.roulettebetting.model.RedisConnectionDTO;
+import masivian.test.roulettebetting.model.RedisConnection;
 
 @Configuration
 public class RedisConfig {
@@ -20,8 +20,8 @@ public class RedisConfig {
 	@Bean
 	@Primary
 	@ConfigurationProperties(prefix = "masivian.connection.redis.roulette")
-	public RedisConnectionDTO redisConnectionRoulette() {
-		return new RedisConnectionDTO();
+	public RedisConnection redisConnectionRoulette() {
+		return new RedisConnection();
 	}
 
 //	@Bean
@@ -31,7 +31,7 @@ public class RedisConfig {
 //		return new RedisConnectionDTO();
 //	}
 
-	JedisConnectionFactory jedisConnectionFactory(RedisConnectionDTO dataConnection) {
+	JedisConnectionFactory jedisConnectionFactory(RedisConnection dataConnection) {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
 
 		if (dataConnection != null) {
@@ -68,7 +68,7 @@ public class RedisConfig {
 
 	@Bean("redisRoullete")
 	RedisTemplate<String, Object> redisTemplateRoulette(
-			@Qualifier("redisConnectionRoulette") RedisConnectionDTO dataConnection) {
+			@Qualifier("redisConnectionRoulette") RedisConnection dataConnection) {
 		final RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory(dataConnection));
 		template.setKeySerializer(new StringRedisSerializer());
@@ -80,7 +80,7 @@ public class RedisConfig {
 
 	@Bean("redisBet")
 	RedisTemplate<String, Object> redisTemplateBet(
-			@Qualifier("redisConnectionRoulette") RedisConnectionDTO dataConnection) {
+			@Qualifier("redisConnectionRoulette") RedisConnection dataConnection) {
 		final RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory(dataConnection));
 		template.setKeySerializer(new StringRedisSerializer());
@@ -92,7 +92,7 @@ public class RedisConfig {
 
 	@Bean("redisClient")
 	RedisTemplate<String, Object> redisTemplateClient(
-			@Qualifier("redisConnectionRoulette") RedisConnectionDTO dataConnection) {
+			@Qualifier("redisConnectionRoulette") RedisConnection dataConnection) {
 		final RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(jedisConnectionFactory(dataConnection));
 		template.setKeySerializer(new StringRedisSerializer());

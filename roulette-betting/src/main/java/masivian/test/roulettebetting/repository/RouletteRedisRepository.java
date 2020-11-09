@@ -8,15 +8,13 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 
-import masivian.test.roulettebetting.constants.APIConstants;
-import masivian.test.roulettebetting.constants.RedisConstants;
 import masivian.test.roulettebetting.model.GenericResponse;
 import masivian.test.roulettebetting.model.Roulette;
 
@@ -26,10 +24,20 @@ public class RouletteRedisRepository {
 	@Autowired
 	@Qualifier("redisRoullete")
 	private RedisTemplate<String, Object> redisTemplateRoullete;
+	@Value("${masivian.code.failed:01}")
+	private String codeFailed;
+	@Value("${masivian.message.failed:null}")
+	private String messageFailed;
+	@Value("${masivian.message.successful:null}")
+	private String messageSuccessful;
+	@Value("${masivian.code.successful:null}")
+	private String codeSuccessful;
+	@Value("${masivian.redis.hash.roulettes:null}")
+	private String hashRoulette;
 
 	public List<Roulette> getAllRoulettes() {
 		List<Roulette> listRoulettes = new ArrayList<>();
-		Map<Object, Object> map = redisTemplateRoullete.opsForHash().entries(RedisConstants.HASH_ROULETTES);
+		Map<Object, Object> map = redisTemplateRoullete.opsForHash().entries(hashRoulette);
 		if (!map.isEmpty()) {
 			Gson gson = new Gson();
 			map.forEach((k, v) -> {
@@ -42,37 +50,32 @@ public class RouletteRedisRepository {
 	}
 
 	public Roulette getRoulette(String idRoullete) throws JsonSyntaxException {
-		try {
-			if (idRoullete != null) {
-				Gson gson = new GsonBuilder().setDateFormat(APIConstants.DATE_FORMAT).create();
-				String productJson = (String) redisTemplateRoullete.opsForHash().get(RedisConstants.HASH_ROULETTES,
-						idRoullete);
-				if (productJson != null && !productJson.isEmpty()) {
-					Roulette roulette = gson.fromJson(productJson, Roulette.class);
-					if (roulette == null) {
-						return roulette;
-					} else {
-						return roulette;
-					}
+		if (idRoullete != null) {
+			Gson gson = new Gson();
+			String productJson = (String) redisTemplateRoullete.opsForHash().get(hashRoulette, idRoullete);
+			if (productJson != null && !productJson.isEmpty()) {
+				Roulette roulette = gson.fromJson(productJson, Roulette.class);
+				if (roulette == null) {
+					return roulette;
+				} else {
+					return roulette;
 				}
 			}
-		} catch (Exception exception) {
-
-			System.out.println("catch " + exception.getMessage());
 		}
+
 		return null;
 	}
 
 	public void modifyRoulette(Roulette roulette) {
 		if (roulette != null) {
-			redisTemplateRoullete.opsForHash().delete(RedisConstants.HASH_ROULETTES, roulette.getIdRoulette());
+			redisTemplateRoullete.opsForHash().delete(hashRoulette, roulette.getIdRoulette());
 			String json = new JSONObject(roulette).toString();
-			redisTemplateRoullete.opsForHash().put(RedisConstants.HASH_ROULETTES, roulette.getIdRoulette(), json);
+			redisTemplateRoullete.opsForHash().put(hashRoulette, roulette.getIdRoulette(), json);
 		}
 	}
 
 	public GenericResponse saveRoulette(Roulette roulette) {
-		GenericResponse result = new GenericResponse(APIConstants.MESSAGE_SUCCESSFUL, APIConstants.CODE_SUCCESSFUL);
+		GenericResponse result = new GenericResponse(messageSuccessful, codeSuccessful);
 		Map<String, String> rouletteMap = new HashMap<>();
 		if (roulette != null) {
 			String json = new JSONObject(roulette).toString();
@@ -80,46 +83,44 @@ public class RouletteRedisRepository {
 			if (!rouletteMap.isEmpty()) {
 				saveRoulette(rouletteMap);
 			} else {
-				result.setCodeResponsse(APIConstants.CODE_FAILED);
-				result.setMessageResponse(APIConstants.MESSAGE_FAILED);
+				return new GenericResponse(messageFailed, codeFailed);
 			}
 		}
 
 		return result;
 	}
 
-	public String loadListRoulettes(List<Roulette> rouletteList) {
-		String result = APIConstants.CODE_FAILED;
-		Map<String, String> roulettes = new HashMap<>();
-		try {
-			if (rouletteList != null && !rouletteList.isEmpty()) {
-				rouletteList.stream().forEach(r -> {
-					String json = new JSONObject(r).toString();
-					roulettes.put(r.getIdRoulette(), json);
-				});
-				if (!roulettes.isEmpty()) {
-					saveRoulettes(roulettes);
-					result = APIConstants.CODE_SUCCESSFUL;
-				} else {
-					result = APIConstants.CODE_SUCCESSFUL;
-				}
-			}
-		} catch (Exception exception) {
-		}
-
-		return result;
-	}
+//	public String loadListRoulettes(List<Roulette> rouletteList) {
+//		String result = APIConstants.CODE_FAILED;
+//		Map<String, String> roulettes = new HashMap<>();
+//		try {
+//			if (rouletteList != null && !rouletteList.isEmpty()) {
+//				rouletteList.stream().forEach(r -> {
+//					String json = new JSONObject(r).toString();
+//					roulettes.put(r.getIdRoulette(), json);
+//				});
+//				if (!roulettes.isEmpty()) {
+//					saveRoulettes(roulettes);
+//					result = APIConstants.CODE_SUCCESSFUL;
+//				} else {
+//					result = APIConstants.CODE_SUCCESSFUL;
+//				}
+//			}
+//		} catch (Exception exception) {
+//		}
+//		return result;
+//	}
 
 	public void saveRoulette(Map<String, String> roulette) {
 		if (roulette != null && !roulette.isEmpty()) {
-			redisTemplateRoullete.opsForHash().putAll(RedisConstants.HASH_ROULETTES, roulette);
+			redisTemplateRoullete.opsForHash().putAll(hashRoulette, roulette);
 		}
 	}
 
 	public void saveRoulettes(Map<String, String> roulettes) {
 		if (roulettes != null && !roulettes.isEmpty()) {
-			redisTemplateRoullete.delete(RedisConstants.HASH_ROULETTES);
-			redisTemplateRoullete.opsForHash().putAll(RedisConstants.HASH_ROULETTES, roulettes);
+			redisTemplateRoullete.delete(hashRoulette);
+			redisTemplateRoullete.opsForHash().putAll(hashRoulette, roulettes);
 		}
 	}
 

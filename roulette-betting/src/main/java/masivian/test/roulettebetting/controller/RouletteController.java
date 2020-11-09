@@ -3,6 +3,7 @@ package masivian.test.roulettebetting.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import masivian.test.roulettebetting.constants.APIConstants;
 import masivian.test.roulettebetting.model.AddRouletteResponse;
 import masivian.test.roulettebetting.model.GenericResponse;
 import masivian.test.roulettebetting.model.Roulette;
@@ -27,7 +27,11 @@ import masivian.test.roulettebetting.service.IRouletteService;
 public class RouletteController {
 	@Autowired
 	private IRouletteService roulleteService;
-
+	@Value("${masivian.code.failed:01}")
+	private String codeFailed;
+	@Value("${masivian.message.failed:null}")
+	private String messageFailed;
+	
 	@PutMapping(path = "addRoulette", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addRoulette(@RequestParam MultiValueMap<String, String> requestParams) {
 		AddRouletteResponse responseMessage = null;
@@ -35,7 +39,7 @@ public class RouletteController {
 			responseMessage = roulleteService.addRoulette();
 			return new ResponseEntity<>(responseMessage, HttpStatus.OK);
 		} catch (Exception exception) {
-			return new ResponseEntity<>(APIConstants.CODE_FAILED, HttpStatus.OK);
+			return new ResponseEntity<>(new GenericResponse(messageFailed, codeFailed), HttpStatus.OK);
 		}
 	}
 	

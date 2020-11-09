@@ -3,9 +3,9 @@ package masivian.test.roulettebetting.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import masivian.test.roulettebetting.constants.APIConstants;
 import masivian.test.roulettebetting.model.AddRouletteResponse;
 import masivian.test.roulettebetting.model.GenericResponse;
 import masivian.test.roulettebetting.model.Roulette;
@@ -19,26 +19,57 @@ public class RouletteService implements IRouletteService {
 	private RouletteRedisRepository repository;
 	@Autowired
 	private Util util;
+	@Value("${masivian.message.successful:null}")
+	private String messageSuccessful;
+	@Value("${masivian.code.successful:null}")
+	private String codeSuccessful;
+	@Value("${masivian.roulette.open.state:null}")
+	private String openState;
+	@Value("${masivian.code.failed:01}")
+	private String codeFailed;
+	@Value("${masivian.message.failed:null}")
+	private String messageFailed;
+	@Value("${masivian.message.notfound:null}")
+	private String messageFailedNotFound;
+	@Value("${masivian.roulette.closed.state:null}")
+	private String closedState;
 
 	public List<Roulette> getAllRoulettes() {
 		return repository.getAllRoulettes();
 	}
 
 	public GenericResponse rouletteOpening(String id) {
-		GenericResponse response = new GenericResponse(APIConstants.MESSAGE_SUCCESSFUL, APIConstants.CODE_SUCCESSFUL);
+		GenericResponse response = new GenericResponse(messageSuccessful, codeSuccessful);
 		if (id != null) {
 			Roulette roulette = findRouletteById(id);
 			if (roulette != null) {
-				roulette.setRouletteStatus(APIConstants.OPEN_STATE);
+				roulette.setRouletteStatus(openState);
 				repository.modifyRoulette(roulette);
 				return response;
 			}
-			response.setCodeResponsse(APIConstants.CODE_FAILED);
-			response.setMessageResponse(APIConstants.MESSAGE_NOT_FOUND);
+			response.setCodeResponsse(codeFailed);
+			response.setMessageResponse(messageFailedNotFound);
 		}
 
 		return response;
 	}
+	
+	public GenericResponse closedRoulette(String id) {
+		GenericResponse response = new GenericResponse(messageSuccessful, codeSuccessful);
+		if (id != null) {
+			Roulette roulette = findRouletteById(id);
+			if (roulette != null) {
+				roulette.setRouletteStatus(closedState);
+				repository.modifyRoulette(roulette);
+				return response;
+			}
+			response.setCodeResponsse(codeFailed);
+			response.setMessageResponse(messageFailedNotFound);
+		}
+
+		return response;
+	}
+
 
 	public Roulette findRouletteById(String id) {
 		Roulette roulette = new Roulette();
@@ -46,6 +77,7 @@ public class RouletteService implements IRouletteService {
 			roulette = repository.getRoulette(id);
 			return roulette;
 		}
+
 		return null;
 	}
 
@@ -55,17 +87,15 @@ public class RouletteService implements IRouletteService {
 		try {
 			Roulette roulette = new Roulette();
 			roulette.setIdRoulette(id);
-			roulette.setRouletteStatus(APIConstants.CLOSED_STATUS);
+			roulette.setRouletteStatus(closedState);
 			genericResponse = repository.saveRoulette(roulette);
-			if (genericResponse.getCodeResponsse().equals(APIConstants.CODE_SUCCESSFUL)) {
-//				List<Roulette> rouletteFind = repository.getAllRoulettes();
-//				System.out.println("RULETA GUARDADA " + rouletteFind.toString());
+			if (genericResponse.getCodeResponsse().equals(codeSuccessful)) {
 				return new AddRouletteResponse(id, genericResponse);
 			}
 		} catch (Exception exception) {
-			return new AddRouletteResponse(null, new GenericResponse(exception.getMessage(), APIConstants.CODE_FAILED));
+			return new AddRouletteResponse(null, new GenericResponse(exception.getMessage(), codeFailed));
 		}
-		return new AddRouletteResponse(null,
-				new GenericResponse(APIConstants.MESSAGE_FAILED, APIConstants.CODE_FAILED));
+
+		return new AddRouletteResponse(null, new GenericResponse(messageFailed, codeFailed));
 	}
 }

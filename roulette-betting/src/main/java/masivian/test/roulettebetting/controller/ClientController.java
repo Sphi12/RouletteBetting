@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import masivian.test.roulettebetting.constants.APIConstants;
 import masivian.test.roulettebetting.model.Client;
 import masivian.test.roulettebetting.model.GenericResponse;
 import masivian.test.roulettebetting.service.IClientService;
@@ -26,6 +26,10 @@ import masivian.test.roulettebetting.service.IClientService;
 public class ClientController {
 	@Autowired
 	private IClientService clientService;
+	@Value("${masivian.code.failed:01}")
+	private String codeFailed;
+	@Value("${masivian.message.failed:null}")
+	private String messageFailed;
 
 	@PutMapping(path = "createClient", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addBet(@RequestHeader Map<String, String> header, @Valid @RequestBody Client body) {
@@ -34,7 +38,7 @@ public class ClientController {
 			responseMessage = clientService.createClient(body);
 			return new ResponseEntity<>(responseMessage, HttpStatus.OK);
 		} catch (Exception exception) {
-			return new ResponseEntity<>(APIConstants.CODE_FAILED, HttpStatus.EXPECTATION_FAILED);
+			return new ResponseEntity<>(new GenericResponse(messageFailed, codeFailed), HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 }

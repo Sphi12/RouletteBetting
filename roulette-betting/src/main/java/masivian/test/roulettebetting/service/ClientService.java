@@ -1,9 +1,9 @@
 package masivian.test.roulettebetting.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import masivian.test.roulettebetting.constants.APIConstants;
 import masivian.test.roulettebetting.model.Client;
 import masivian.test.roulettebetting.model.GenericResponse;
 import masivian.test.roulettebetting.repository.ClientRedisRepository;
@@ -13,12 +13,17 @@ public class ClientService implements IClientService {
 
 	@Autowired
 	ClientRedisRepository repository;
+	@Value("${masivian.message.successful:null}")
+	private String messageSuccessful;
+	@Value("${masivian.code.successful:null}")
+	private String codeSuccessful;
 
 	public GenericResponse createClient(Client client) {
-		GenericResponse response = new GenericResponse(APIConstants.MESSAGE_SUCCESSFUL, APIConstants.CODE_SUCCESSFUL);
+		GenericResponse response = new GenericResponse(messageSuccessful, codeSuccessful);
 		if (client != null) {
 			response = repository.createClient(client);
 		}
+		
 		return response;
 	}
 
@@ -27,6 +32,7 @@ public class ClientService implements IClientService {
 			Client client = repository.getClient(id);
 			return client;
 		}
+		
 		return null;
 	}
 
